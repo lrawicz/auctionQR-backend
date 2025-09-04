@@ -1,0 +1,9 @@
+#[account]
+pub struct Auction {
+    pub authority: Pubkey,      // La cuenta que recibe los fondos de la subasta.
+    pub content: String,        // El string que se está subastando.
+    pub end_timestamp: i64,     // Momento en que finaliza la subasta (en formato Unix timestamp).
+    pub highest_bid: u64,       // La puja más alta actual (en lamports).
+    pub highest_bidder: Pubkey, // La clave pública del mejor postor.
+    pub is_active: bool,        // Un booleano para saber si la subasta está en curso.
+}

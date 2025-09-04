@@ -1,0 +1,147 @@
+use anchor_lang::prelude::*;
+use anchor_lang::solana_program::{system_instruction, program::invoke};
+
+declare_id!("YourProgramIdGoesHere"); // Reemplazar con el ID de tu programa
+
+#[program]
+pub mod daily_auction {
+    use super::*;
+
+    // Inicializa la subasta por primera vez
+    pub fn initialize(ctx: Context<Initialize>, initial_content: String) -> Result<()> {
+        let auction = &mut ctx.accounts.auction;
+        auction.authority = *ctx.accounts.authority.key;
+        auction.content = initial_content;
+        auction.is_active = false;
+        Ok(())
+    }
+
+    // Inicia un nuevo ciclo de subasta
+    pub fn start_auction(ctx: Context<ManageAuction>) -> Result<()> {
+        let auction = &mut ctx.accounts.auction;
+        require!(!auction.is_active, AuctionError::AuctionAlreadyActive);
+        
+        let clock = Clock::get()?;
+        auction.end_timestamp = clock.unix_timestamp + (24 * 60 * 60); // 24 horas
+        auction.is_active = true;
+        auction.highest_bid = 0;
+        auction.highest_bidder = Pubkey::default();
+
+        msg!("Nueva subasta iniciada. Finaliza en 24 horas.");
+        Ok(())
+    }
+
+    // Un usuario realiza una oferta
+    pub fn bid(ctx: Context<Bid>, amount: u64) -> Result<()> {
+        let auction = &mut ctx.accounts.auction;
+        let bidder = &ctx.accounts.bidder;
+        let clock = Clock::get()?;
+
+        require!(auction.is_active, AuctionError::AuctionNotActive);
+        require!(clock.unix_timestamp < auction.end_timestamp, AuctionError::AuctionEnded);
+        require!(amount > auction.highest_bid, AuctionError::BidTooLow);
+
+        // Lógica para transferir SOL (simplificada)
+        // En un caso real, se usaría una cuenta PDA (Program Derived Address) para custodiar los fondos.
+        // Aquí se transfiere directamente a la autoridad para simplificar.
+        let transfer_instruction = system_instruction::transfer(
+            bidder.to_account_info().key,
+            &ctx.accounts.authority.key(),
+            amount,
+        );
+        invoke(&transfer_instruction, &[
+            bidder.to_account_info(),
+            ctx.accounts.authority.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+        ])?;
+        
+        // Actualizar el estado de la subasta
+        auction.highest_bid = amount;
+        auction.highest_bidder = *bidder.key;
+        
+        msg!("Nueva oferta recibida: {} lamports de {}", amount, bidder.key());
+        Ok(())
+    }
+
+    // Finaliza la subasta
+    pub fn end_auction(ctx: Context<ManageAuction>) -> Result<()> {
+        let auction = &mut ctx.accounts.auction;
+        let clock = Clock::get()?;
+
+        require!(auction.is_active, AuctionError::AuctionNotActive);
+        require!(clock.unix_timestamp >= auction.end_timestamp, AuctionError::AuctionNotOver);
+
+        auction.is_active = false;
+        msg!("Subasta finalizada. Ganador: {}", auction.highest_bidder);
+        Ok(())
+    }
+
+    // El ganador cambia el string
+    pub fn set_content(ctx: Context<SetContent>, new_content: String) -> Result<()> {
+        let auction = &mut ctx.accounts.auction;
+        require!(!auction.is_active, AuctionError::AuctionIsActive);
+        require!(*ctx.accounts.winner.key == auction.highest_bidder, AuctionError::NotTheWinner);
+
+        auction.content = new_content;
+        msg!("Contenido actualizado a: {}", auction.content);
+        Ok(())
+    }
+}
+
+// --- Definición de Cuentas y Errores ---
+
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(init, payer = authority, space = 8 + 32 + 500 + 8 + 8 + 32 + 1)] // Espacio para el string y otros campos
+    pub auction: Account<'info, Auction>,
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct ManageAuction<'info> {
+    #[account(mut, has_one = authority)]
+    pub auction: Account<'info, Auction>,
+    pub authority: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct Bid<'info> {
+    #[account(mut)]
+    pub auction: Account<'info, Auction>,
+    #[account(mut)]
+    pub bidder: Signer<'info>,
+    /// CHECK: La autoridad recibe los fondos.
+    #[account(mut)]
+    pub authority: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct SetContent<'info> {
+    #[account(mut)]
+    pub auction: Account<'info, Auction>,
+    pub winner: Signer<'info>,
+}
+
+#[account]
+pub struct Auction {
+    pub authority: Pubkey,
+    pub content: String,
+    pub end_timestamp: i64,
+    pub highest_bid: u64,
+    pub highest_bidder: Pubkey,
+    pub is_active: bool,
+}
+
+#[error_code]
+pub enum AuctionError {
+    AuctionAlreadyActive,
+    AuctionNotActive,
+    AuctionEnded,
+    BidTooLow,
+    AuctionNotOver,
+    NotTheWinner,
+    AuctionIsActive,
+}
