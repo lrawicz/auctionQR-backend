@@ -11,5 +11,15 @@ services:
     volumes:
       - qrAuction_db:/var/lib/postgresql/data
 
+  backend:
+    build: .
+    container_name: qrAuction_backend
+    restart: always
+    depends_on:
+      - postgres_db
+    env_file: ".env"
+    ports:
+      - "3000:3000"
+
 volumes:
   qrAuction_db:
