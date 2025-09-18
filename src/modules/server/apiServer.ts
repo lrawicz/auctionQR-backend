@@ -28,6 +28,14 @@ export class ApiServer {
         this.app.get('/qr', (_: express.Request, res: express.Response) => {
             res.redirect(this.oldUrl);
         });
+
+        this.app.get('/status', (_: express.Request, res: express.Response) => {
+            res.json({status:"ok"});
+        });
+        
+        this.app.get('/getQrContent', (_: express.Request, res: express.Response) => {
+            res.json({value:this.oldUrl});
+        });
     }
 
     public start(port: number | string) {
