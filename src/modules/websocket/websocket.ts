@@ -91,6 +91,11 @@ class WebSocketSingleton {
     }
 }
 
+  public close(callback?: () => void): void {
+    console.log('Closing WebSocket server...');
+    this.wss.close(callback);
+  }
+
   public getRooms(): Record<string, Record<string, WebSocket>> {
     return this.rooms;
   }

@@ -30,9 +30,17 @@ function main() {
     // --- Graceful Shutdown ---
     const gracefulShutdown = (signal: string) => {
         console.log(`Received ${signal}, shutting down gracefully...`);
-        apiServer.stop(() => {
-            console.log('Closed out remaining connections.');
-            process.exit(0);
+
+        // Stop the Solana event listener
+        solanaListener.stop();
+
+        // Close the WebSocket server and then the API server
+        webSocketSingleton.close(() => {
+            console.log('WebSocket server closed.');
+            apiServer.stop(() => {
+                console.log('Closed out remaining connections.');
+                process.exit(0);
+            });
         });
     };
 

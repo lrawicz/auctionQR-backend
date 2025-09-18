@@ -9,12 +9,19 @@ const triggerType: "log" | "event" = "log";
 export class SolanaEventListener extends Subject {
     private connection: anchor.web3.Connection;
     private programId: anchor.web3.PublicKey;
+    private logSubscriptionId: number | null = null;
+    private eventListenerId: number | null = null;
+    private program: Program<Idl>;
 
     constructor() {
         super();
         console.log("Initializing Solana Event Listener...");
         this.programId = new anchor.web3.PublicKey(idl.address);
         this.connection = new anchor.web3.Connection(anchor.web3.clusterApiUrl("devnet"), 'confirmed');
+        const keypair = anchor.web3.Keypair.generate();
+        const wallet = new anchor.Wallet(keypair);
+        const provider = new AnchorProvider(this.connection, wallet, { commitment: 'confirmed' });
+        this.program = new Program(idl as Idl, provider) as unknown as Program<Idl>;
     }
 
     public start() {
@@ -23,8 +30,20 @@ export class SolanaEventListener extends Subject {
         this.listenForAnchorEvents();
     }
 
+    public stop() {
+        console.log("Stopping event listeners...");
+        if (this.logSubscriptionId !== null) {
+            this.connection.removeOnLogsListener(this.logSubscriptionId);
+            console.log("Removed logs listener.");
+        }
+        if (this.eventListenerId !== null) {
+            this.program.removeEventListener(this.eventListenerId);
+            console.log("Removed event listener.");
+        }
+    }
+
     private listenForLogs() {
-        this.connection.onLogs(this.programId, (logs, context) => {
+        this.logSubscriptionId = this.connection.onLogs(this.programId, (logs, context) => {
             if (triggerType === "event") return;
             if (logs.err) {
                 console.error("Transaction Error:", logs.err);
@@ -42,12 +61,7 @@ export class SolanaEventListener extends Subject {
 
     private listenForAnchorEvents() {
         // This part remains mostly for demonstration as it's disabled by triggerType
-        const keypair = anchor.web3.Keypair.generate();
-        const wallet = new anchor.Wallet(keypair);
-        const provider = new AnchorProvider(this.connection, wallet, { commitment: 'confirmed' });
-        const program = new Program(idl as Idl, provider) as unknown as Program<Idl>;
-
-        program.addEventListener("BidPlaced", (event, slot) => {
+        this.eventListenerId = this.program.addEventListener("BidPlaced", (event, slot) => {
             if (triggerType === "log") return;
             console.log("----------------------------");
             console.log("BidPlaced event received!", event);
