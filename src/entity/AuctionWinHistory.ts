@@ -4,15 +4,15 @@ import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 export class AuctionWinHistory {
 
     @PrimaryGeneratedColumn()
-    id: number
+    id!: number
 
     @Column({ type: 'date' })
-    date: Date
+    date!: Date
 
     @Column("decimal", { precision: 10, scale: 2 })
-    amount: number
+    amount!: number
 
     @Column()
-    url: string
+    url!: string
 
 }
