@@ -2,7 +2,8 @@ import http from 'http';
 import { WebSocket, WebSocketServer } from 'ws';
 import { v4 } from 'uuid';
 import { ApiServer } from '../server/apiServer';
-import { Message } from '../interfaces/interfaces';
+import { Message, MessageContent } from '../interfaces/interfaces';
+import { MessageService } from '../message/MessageService';
 
 interface WebSocketMessage {
   message: any;
@@ -19,7 +20,10 @@ class WebSocketSingleton {
     this.wss = new WebSocketServer({ server });
   }
 
-  public sendMessage(room:string, message:Message){
+  public sendMessageToUuid(){
+    
+  }
+  public sendMessageToRoom(room:string, message:Message){
     console.log(`Sending message to room ${room}: ${JSON.stringify(message)}`)
     if (this.rooms[room]) {
       Object.values(this.rooms[room])
@@ -35,9 +39,27 @@ class WebSocketSingleton {
     if (!this.rooms[room]?.[uuid_info]) return;
     delete this.rooms[room][uuid_info];
   };
-  public joinRoom(uuid_info:string,room: string, ws: WebSocket): void{  
+  public async joinRoom(uuid_info:string,room: string, ws: WebSocket): Promise<void>{  
     console.log(`${uuid_info} - JOINING room ${room}`);
     if (!this.rooms[room]) this.rooms[room] = {}; // create the room
+    let data:Message & {messages:MessageContent[]}  = {
+      messages:[],
+      meta:"pull_from_db",
+      room:room
+    }
+    const messageService = new MessageService()
+    const messageDB = await messageService
+      .findAll({where:{room:room},order:{create_date:"ASC"}})
+    console.log(messageDB)
+    data.messages = messageDB.map((item)=>{
+      return { 
+        address: item.address,
+        amount: item.amount,
+        url: item.url,
+        timestamp: item.create_date
+      }
+    }) 
+    ws.send(JSON.stringify(data))
     if (!this.rooms[room][uuid_info]) this.rooms[room][uuid_info] = ws; // join the room
   }
   

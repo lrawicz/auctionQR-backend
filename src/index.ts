@@ -1,9 +1,20 @@
+import "reflect-metadata";
 import { webSocketSingleton } from './modules/websocket/websocket';
 import { ApiServer } from './modules/server/apiServer';
 import { SolanaEventListener } from './modules/smartContract/EventListener';
 import { WebSocketNotifier } from './modules/websocket/WebSocketNotifier';
+import { AppDataSource } from './data-source';
 
-function main() {
+async function main() {
+    // --- Initialize TypeORM ---
+    await AppDataSource.initialize()
+        .then(() => {
+            console.log("Data Source has been initialized!")
+        })
+        .catch((err) => {
+            console.error("Error during Data Source initialization", err)
+        })
+
     // --- Server and WebSocket Setup ---
     const apiServer = ApiServer.getInstance();
     const port = process.env.PORT || 3001;

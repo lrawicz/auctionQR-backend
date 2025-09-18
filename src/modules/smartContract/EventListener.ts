@@ -53,7 +53,7 @@ export class SolanaEventListener extends Subject {
             const message = BidMessageFactory.createFromLogs(logs.logs);
 
             if (message) {
-                console.log("New bid message created, notifying observers...");
+                console.log(" message created, notifying observers...");
                 this.notify(message); // Notify observers
             }
         });

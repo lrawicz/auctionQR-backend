@@ -56,7 +56,7 @@ function main() {
     );
     program.addEventListener("BidPlaced", (event, slot) => {
         console.log("BidPlaced event received!");
-        io.to("bidRoom").emit("message", "hola mundo");
+        io.to(`bidRoom_${new Date().toISOString().slice(0,10)}`).emit("message", "hola mundo");
     });
     console.log("Listening for BidPlaced events from program:", programId.toBase58());
     //const connection = new Connection(SOLANA_NETWORK, 'confirmed');

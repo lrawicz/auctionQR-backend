@@ -1,1 +1,0 @@
-# bidQR-backend
