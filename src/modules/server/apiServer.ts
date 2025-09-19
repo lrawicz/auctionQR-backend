@@ -2,7 +2,7 @@ import express from 'express';
 import http from 'http';
 import { AuctionWinHistoryService } from "../auctionWinHistory/AuctionWinHistoryService";
 import { AuctionWinHistory } from '../../entity/AuctionWinHistory';
-
+import cors from 'cors';
 export class ApiServer {
     private static instance: ApiServer;
     private app: express.Express;
@@ -10,8 +10,23 @@ export class ApiServer {
     private oldUrl: string="";
     private constructor() {
         this.app = express();
+        this.app.use(cors());
+        this.app.use(express.json());
+        this.app.use(express.urlencoded({ extended: true }));
+        
         this.server = http.createServer(this.app);
         this.routes();
+        //solve cors errror
+        // this.app.use((req, res, next) => {
+        //     res.header('Access-Control-Allow-Origin', '*');
+        //     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+        //     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+        //     if (req.method === 'OPTIONS') {
+        //         res.sendStatus(200);
+        //     } else {
+        //         next();
+        //     }
+        // });
     }
     public setOldUrl(url: string) {
         this.oldUrl = url;
