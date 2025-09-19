@@ -1,6 +1,7 @@
 import express from 'express';
 import http from 'http';
 import { AuctionWinHistoryService } from "../auctionWinHistory/AuctionWinHistoryService";
+import { AuctionWinHistory } from '../../entity/AuctionWinHistory';
 
 export class ApiServer {
     private static instance: ApiServer;
@@ -40,7 +41,7 @@ export class ApiServer {
 
         this.app.get('/latest-qr-content', async (_: express.Request, res: express.Response) => {
             const auctionWinHistoryService = new AuctionWinHistoryService();
-            const latestEntry = await auctionWinHistoryService.getLatest();
+            const latestEntry:AuctionWinHistory|null = await auctionWinHistoryService.getLatest();
             if (latestEntry) {
                 res.json({ url: latestEntry.url });
             } else {
