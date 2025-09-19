@@ -22,4 +22,13 @@ export class AuctionWinHistoryService {
     async findOne(id: number): Promise<AuctionWinHistory | null> {
         return this.auctionWinHistoryRepository.findOneBy({ id });
     }
+
+    async getLatest(): Promise<AuctionWinHistory | null> {
+        return this.auctionWinHistoryRepository.findOne({
+            order: {
+                date: "DESC",
+                id: "DESC" // Added id as a secondary sort to ensure consistent ordering for entries with the same date
+            }
+        });
+    }
 }

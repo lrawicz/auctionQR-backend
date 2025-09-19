@@ -81,4 +81,23 @@ export class AuctionManager {
             throw error;
         }
     }
+
+    public async endAndStartAuction(newContent: string) {
+        console.log("Attempting to end and start a new auction...");
+        try {
+            const tx = await this.program.methods
+                .endAndStartAuction(newContent)
+                .accounts({
+                    auction: this.auctionPda,
+                    authority: this.authority.publicKey,
+                    systemProgram: anchor.web3.SystemProgram.programId,
+                })
+                .rpc();
+            console.log("End and start auction transaction signature", tx);
+            return tx;
+        } catch (error) {
+            console.error("Error ending and starting auction:", error);
+            throw error;
+        }
+    }
 }

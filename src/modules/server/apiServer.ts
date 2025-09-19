@@ -1,5 +1,6 @@
 import express from 'express';
 import http from 'http';
+import { AuctionWinHistoryService } from "../auctionWinHistory/AuctionWinHistoryService";
 
 export class ApiServer {
     private static instance: ApiServer;
@@ -35,6 +36,16 @@ export class ApiServer {
         
         this.app.get('/getQrContent', (_: express.Request, res: express.Response) => {
             res.json({value:this.oldUrl});
+        });
+
+        this.app.get('/latest-qr-content', async (_: express.Request, res: express.Response) => {
+            const auctionWinHistoryService = new AuctionWinHistoryService();
+            const latestEntry = await auctionWinHistoryService.getLatest();
+            if (latestEntry) {
+                res.json({ url: latestEntry.url });
+            } else {
+                res.status(404).json({ message: "No latest QR content found." });
+            }
         });
     }
 
