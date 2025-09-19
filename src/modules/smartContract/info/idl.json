@@ -66,6 +66,59 @@
       ]
     },
     {
+      "name": "end_and_start_auction",
+      "discriminator": [
+        17,
+        95,
+        142,
+        94,
+        169,
+        102,
+        175,
+        32
+      ],
+      "accounts": [
+        {
+          "name": "auction",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  117,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "auction"
+          ]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "new_content",
+          "type": "string"
+        }
+      ]
+    },
+    {
       "name": "end_auction",
       "discriminator": [
         252,
@@ -163,6 +216,54 @@
       ]
     },
     {
+      "name": "set_authority",
+      "discriminator": [
+        133,
+        250,
+        37,
+        21,
+        110,
+        163,
+        26,
+        121
+      ],
+      "accounts": [
+        {
+          "name": "auction",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  117,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "auction"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "new_authority",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
       "name": "start_auction",
       "discriminator": [
         255,
@@ -203,7 +304,12 @@
           ]
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "new_content",
+          "type": "string"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -222,6 +328,19 @@
     }
   ],
   "events": [
+    {
+      "name": "AuctionEnded",
+      "discriminator": [
+        91,
+        165,
+        139,
+        202,
+        204,
+        215,
+        92,
+        52
+      ]
+    },
     {
       "name": "BidPlaced",
       "discriminator": [
@@ -315,6 +434,26 @@
           {
             "name": "bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AuctionEnded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "winner",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "content",
+            "type": "string"
           }
         ]
       }

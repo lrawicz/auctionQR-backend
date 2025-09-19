@@ -52,11 +52,11 @@ export class AuctionManager {
         }
     }
 
-    public async startAuction() {
+    public async startAuction(newContent: string ="") {
         console.log("Attempting to start a new auction...");
         try {
             const tx = await this.program.methods
-                .startAuction()
+                .startAuction(newContent)
                 .accounts({
                     auction: this.auctionPda,
                     authority: this.authority.publicKey,

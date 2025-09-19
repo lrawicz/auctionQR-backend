@@ -72,6 +72,59 @@ export type DailyAuction = {
       ]
     },
     {
+      "name": "endAndStartAuction",
+      "discriminator": [
+        17,
+        95,
+        142,
+        94,
+        169,
+        102,
+        175,
+        32
+      ],
+      "accounts": [
+        {
+          "name": "auction",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  117,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "auction"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "newContent",
+          "type": "string"
+        }
+      ]
+    },
+    {
       "name": "endAuction",
       "discriminator": [
         252,
@@ -169,6 +222,54 @@ export type DailyAuction = {
       ]
     },
     {
+      "name": "setAuthority",
+      "discriminator": [
+        133,
+        250,
+        37,
+        21,
+        110,
+        163,
+        26,
+        121
+      ],
+      "accounts": [
+        {
+          "name": "auction",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  117,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "auction"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "newAuthority",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
       "name": "startAuction",
       "discriminator": [
         255,
@@ -209,7 +310,12 @@ export type DailyAuction = {
           ]
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "newContent",
+          "type": "string"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -228,6 +334,19 @@ export type DailyAuction = {
     }
   ],
   "events": [
+    {
+      "name": "auctionEnded",
+      "discriminator": [
+        91,
+        165,
+        139,
+        202,
+        204,
+        215,
+        92,
+        52
+      ]
+    },
     {
       "name": "bidPlaced",
       "discriminator": [
@@ -321,6 +440,26 @@ export type DailyAuction = {
           {
             "name": "bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "auctionEnded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "winner",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "content",
+            "type": "string"
           }
         ]
       }
