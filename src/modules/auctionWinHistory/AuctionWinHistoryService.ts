@@ -1,3 +1,4 @@
+import { MoreThan } from "typeorm";
 import { AppDataSource } from "../../data-source";
 import { AuctionWinHistory } from "../../entity/AuctionWinHistory";
 
@@ -25,9 +26,12 @@ export class AuctionWinHistoryService {
 
     async getLatest(): Promise<AuctionWinHistory | null> {
         return this.auctionWinHistoryRepository.findOne({
+            where:{
+                date:MoreThan(new Date(new Date().setDate(new Date().getDate() - 1)))
+            },
             order: {
                 date: "DESC",
-                id: "DESC" // Added id as a secondary sort to ensure consistent ordering for entries with the same date
+                id: "DESC"
             }
         });
     }
