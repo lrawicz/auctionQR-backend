@@ -1,15 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, Column } from "typeorm";
 
 @Entity()
 export class AuctionWinHistory {
 
-    @PrimaryGeneratedColumn()
-    id!: number
+    @Column({ type: 'text',unique: true, nullable: false,primary: true })
+    room!: String
 
-    @Column({ type: 'date' })
-    date!: Date
-
-    @Column("decimal", { precision: 10, scale: 2 })
+    @Column( {type:"bigint" })
     amount!: number
 
     @Column()

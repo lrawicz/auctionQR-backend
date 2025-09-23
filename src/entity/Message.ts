@@ -15,7 +15,7 @@ export class Message {
     @Index("IDX_messages_room")
     room!: string;
 
-    @Column({ type: 'text' })
+    @Column({ type: 'bigint' })
     amount!: number;
 
     @Column({ type: 'text' })
