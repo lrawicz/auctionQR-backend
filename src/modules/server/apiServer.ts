@@ -13,20 +13,9 @@ export class ApiServer {
         this.app.use(cors());
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
-        
+
         this.server = http.createServer(this.app);
         this.routes();
-        //solve cors errror
-        // this.app.use((req, res, next) => {
-        //     res.header('Access-Control-Allow-Origin', '*');
-        //     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-        //     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-        //     if (req.method === 'OPTIONS') {
-        //         res.sendStatus(200);
-        //     } else {
-        //         next();
-        //     }
-        // });
     }
     public setOldUrl(url: string) {
         this.oldUrl = url;
@@ -42,8 +31,15 @@ export class ApiServer {
     }
 
     private routes() {
-        this.app.get('/qr', (_: express.Request, res: express.Response) => {
-            res.redirect(this.oldUrl);
+        this.app.get('/qr-redirect', (_: express.Request, res: express.Response) => {
+            const auctionWinHistoryService = new AuctionWinHistoryService();
+            auctionWinHistoryService.getLatest().then((latestEntry:AuctionWinHistory|null) => {
+                if (!latestEntry)  return res.status(404).json({ message: "No URL found for redirection." })
+                return res.redirect(301, latestEntry.url);
+            }).catch((error) => {
+                console.error("Error fetching latest entry:", error);
+                return res.status(500).json({ message: "Internal server error." });
+            });
         });
 
         this.app.get('/status', (_: express.Request, res: express.Response) => {
