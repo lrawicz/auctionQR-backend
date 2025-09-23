@@ -34,8 +34,15 @@ export class ApiServer {
         this.app.get('/qr-redirect', (_: express.Request, res: express.Response) => {
             const auctionWinHistoryService = new AuctionWinHistoryService();
             auctionWinHistoryService.getLatest().then((latestEntry:AuctionWinHistory|null) => {
-                if (!latestEntry)  return res.status(404).json({ message: "No URL found for redirection." })
-                return res.redirect(301, latestEntry.url);
+                if (!latestEntry)  return res.status(404).json({ message: "No URL found for redirection." });
+
+                res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+                res.set('Pragma', 'no-cache');
+                res.set('Expires', '0');
+                const redirect = latestEntry.url.startsWith("http://") || latestEntry.url.startsWith("https://")
+                                    ?latestEntry.url
+                                    :"http://"+latestEntry.url;
+                return res.redirect(301, redirect);
             }).catch((error) => {
                 console.error("Error fetching latest entry:", error);
                 return res.status(500).json({ message: "Internal server error." });
