@@ -20,27 +20,19 @@ export class AuctionWinHistoryService {
         return this.auctionWinHistoryRepository.find();
     }
 
-    async findOne(id: number): Promise<AuctionWinHistory | null> {
-        return this.auctionWinHistoryRepository.findOneBy({ id });
+    async findOne(room: string): Promise<AuctionWinHistory | null> {
+        return this.auctionWinHistoryRepository.findOneBy({ room });
     }
 
     async getLatest(): Promise<AuctionWinHistory | null> {
-
-        const startOfYesterday = new Date();
-        startOfYesterday.setDate(startOfYesterday.getDate() - 1);
-        startOfYesterday.setHours(0, 0, 0, 0); 
-
-        const endOfYesterday = new Date();
-        endOfYesterday.setDate(startOfYesterday.getDate() );
-        endOfYesterday.setHours(23, 59, 59, 999); 
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const year= yesterday.getFullYear()
+        const month= (yesterday.getMonth() + 1).toString().padStart(2, '0')
+        const day= yesterday.getDate().toString().padStart(2, '0')
+        const room = `bidRoom_${year}-${month}-${day}`
         const result = await this.auctionWinHistoryRepository.findOne({
-            where:
-                {date: Between(startOfYesterday, endOfYesterday)}
-            ,
-            order: {
-                date: "DESC",
-                id: "DESC"
-            }
+            where:{room: room}
         });
         return result
     }
