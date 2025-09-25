@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  qrAuction_db:
+  qr_auction_db:
     image: postgres:15
-    container_name: qrAuction_db
+    container_name: qr_auction_db
     restart: always
     env_file: ".env"
     ports:
@@ -13,15 +13,16 @@ services:
     networks:
       - qrAuction_network
 
-  backend:
+  qr_auction_api:
     build: .
-    container_name: qrAuction_backend
+    image: qr_auction_api
+    container_name: qr_auction_api
     restart: always
     depends_on:
-      - qrAuction_db
+      - qr_auction_db
     env_file: ".env"
     environment:
-      - POSTGRES_HOST=qrAuction_db
+      - POSTGRES_HOST=qr_auction_db
       - NODE_ENV=production
     ports:
       - "3001:3001"
