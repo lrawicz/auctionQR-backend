@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  postgres_db:
+  qrAuction_db:
     image: postgres:15
     container_name: qrAuction_db
     restart: always
@@ -16,10 +16,11 @@ services:
     container_name: qrAuction_backend
     restart: always
     depends_on:
-      - postgres_db
+      - qrAuction_db
     env_file: ".env"
     environment:
-      - POSTGRES_HOST=postgres_db
+      - POSTGRES_HOST=qrAuction_db
+      - NODE_ENV=production
     ports:
       - "3001:3001"
 
