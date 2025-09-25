@@ -9,7 +9,9 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - qrAuction_db:/var/lib/postgresql/data
+      - qrAuction_db_volume:/var/lib/postgresql/data
+    networks:
+      - qrAuction_network
 
   backend:
     build: .
@@ -23,6 +25,10 @@ services:
       - NODE_ENV=production
     ports:
       - "3001:3001"
+    networks:
+      - qrAuction_network
 
 volumes:
-  qrAuction_db:
+  qrAuction_db_volume:
+networks:
+  qrAuction_network:
