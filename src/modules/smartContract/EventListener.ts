@@ -4,7 +4,7 @@ import idl from './info/idl.json';
 import { BidMessageFactory } from './BidMessageFactory';
 import { Subject } from '../events/Observer';
 
-const triggerType: "log" | "event" = "log";
+const triggerType: ("log" | "event")[] = ["log","event"];
 
 export class SolanaEventListener extends Subject {
     private connection: anchor.web3.Connection;
@@ -26,7 +26,7 @@ export class SolanaEventListener extends Subject {
 
     public start() {
         console.log("Starting event listeners...");
-        this.listenForLogs();
+        //this.listenForLogs();
         this.listenForAnchorEvents();
     }
 
@@ -44,7 +44,7 @@ export class SolanaEventListener extends Subject {
 
     private listenForLogs() {
         this.logSubscriptionId = this.connection.onLogs(this.programId, (logs, context) => {
-            if (triggerType === "event") return;
+            if (!triggerType.includes("log") ) return;
             if (logs.err) {
                 console.error("Transaction Error:", logs.err);
                 return;
@@ -60,16 +60,15 @@ export class SolanaEventListener extends Subject {
     }
 
     private listenForAnchorEvents() {
-        // This part remains mostly for demonstration as it's disabled by triggerType
-        this.eventListenerId = this.program.addEventListener("BidPlaced", (event, slot) => {
-            if (triggerType === "log") return;
+        console.log("start eventin lissening!!!")
+        this.eventListenerId = this.program.addEventListener("bidPlaced", (event, slot) => {
+            //if (!triggerType.includes("event")) return;
             console.log("----------------------------");
             console.log("BidPlaced event received!", event);
-            // In a real scenario, you would convert the Anchor event to your standard Message format
-            // const message = BidMessageFactory.createFromAnchorEvent(event);
-            // if (message) {
-            //     this.notify(message);
-            // }
+            const message = BidMessageFactory.createFromAnchorEvent(event);
+            if (message) {
+                this.notify(message);
+            }
         });
     }
 }

@@ -25,15 +25,18 @@ export class AuctionWinHistoryService {
     }
 
     async getLatest(): Promise<AuctionWinHistory | null> {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const year= yesterday.getFullYear()
-        const month= (yesterday.getMonth() + 1).toString().padStart(2, '0')
-        const day= yesterday.getDate().toString().padStart(2, '0')
-        const room = `bidRoom_${year}-${month}-${day}`
-        const result = await this.auctionWinHistoryRepository.findOne({
-            where:{room: room}
-        });
-        return result
+        //const yesterday = new Date();
+        //yesterday.setDate(yesterday.getDate() - 1);
+        // const year= yesterday.getFullYear()
+        // const month= (yesterday.getMonth() + 1).toString().padStart(2, '0')
+        // const day= yesterday.getDate().toString().padStart(2, '0')
+        // const room = `bidRoom_${year}-${month}-${day}`
+        try{
+            const result = await this.auctionWinHistoryRepository.find({order:{auction_number:"DESC"}})
+            return result[0]
+        }catch(error){
+            console.log(error)
+            return null
+        }
     }
 }

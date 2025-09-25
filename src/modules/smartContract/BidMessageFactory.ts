@@ -1,4 +1,5 @@
-import { Message } from '../interfaces/interfaces';
+import { Message } from './../interfaces/interfaces';
+import { PublicKey } from '@solana/web3.js';
 
 export class BidMessageFactory {
     public static createFromLogs(logs: string[]): Message | null {
@@ -26,7 +27,7 @@ export class BidMessageFactory {
             }
 
             const message: Message = {
-                message: { url, amount, address, timestamp },
+                content: { url, amount, address, timestamp },
                 meta: "new_bid_placed",
                 room: `bidRoom_${new Date().toISOString().slice(0,10)}`
             };
@@ -35,6 +36,28 @@ export class BidMessageFactory {
 
         } catch (error) {
             console.error("Error parsing bid logs:", error);
+            return null;
+        }
+    }
+
+    public static createFromAnchorEvent(event: any): Message | null {
+        try {
+            const { bidder, amount, newContent } = event;
+
+            const message: Message = {
+                content: {
+                    url: newContent,
+                    amount: Number(amount.toString()), // Anchor's u64 is a BN object, convert to number
+                    address: new PublicKey(bidder).toBase58(),
+                    timestamp: new Date(), // Use current timestamp for event
+                },
+                meta: "new_bid_placed",
+                room: `bidRoom_${new Date().toISOString().slice(0,10)}`
+            };
+
+            return message;
+        } catch (error) {
+            console.error("Error parsing BidPlaced event:", error);
             return null;
         }
     }

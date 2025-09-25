@@ -1,5 +1,5 @@
-import { AppDataSource } from '../../data-source';
-import { Message } from '../../entity/Message';
+import { AppDataSource } from '../data-source';
+import { Message } from '../entity/Message';
 import { FindManyOptions, Repository } from 'typeorm';
 
 export class MessageService {

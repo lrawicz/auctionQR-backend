@@ -39,9 +39,10 @@ export class ApiServer {
                 res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
                 res.set('Pragma', 'no-cache');
                 res.set('Expires', '0');
-                const redirect = latestEntry.url.startsWith("http://") || latestEntry.url.startsWith("https://")
-                                    ?latestEntry.url
-                                    :"http://"+latestEntry.url;
+                const urlRAW = latestEntry.url !== ""?latestEntry.url:'app.qrsol.fun'
+                const redirect = urlRAW.startsWith("http://") || urlRAW.startsWith("https://")
+                                    ?urlRAW
+                                    :"http://"+urlRAW;
                 return res.redirect(301, redirect);
             }).catch((error) => {
                 console.error("Error fetching latest entry:", error);
@@ -61,7 +62,7 @@ export class ApiServer {
             const auctionWinHistoryService = new AuctionWinHistoryService();
             const latestEntry:AuctionWinHistory|null = await auctionWinHistoryService.getLatest();
             if (latestEntry) {
-                res.json({ url: latestEntry.url });
+                res.json(latestEntry);
             } else {
                 res.status(404).json({ message: "No latest QR content found." });
             }

@@ -3,7 +3,7 @@ import { WebSocket, WebSocketServer } from 'ws';
 import { v4 } from 'uuid';
 import { ApiServer } from '../server/apiServer';
 import { Message, MessageContent } from '../interfaces/interfaces';
-import { MessageService } from '../message/MessageService';
+import { MessageService } from '../../services/MessageService';
 
 interface WebSocketMessage {
   message: any;
@@ -50,7 +50,6 @@ class WebSocketSingleton {
     const messageService = new MessageService()
     const messageDB = await messageService
       .findAll({where:{room:room},order:{create_date:"ASC"}})
-    console.log(messageDB)
     data.messages = messageDB.map((item)=>{
       return { 
         address: item.address,
