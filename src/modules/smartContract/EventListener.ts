@@ -1,8 +1,10 @@
 import { Program, AnchorProvider, Idl } from '@coral-xyz/anchor';
 import * as anchor from "@coral-xyz/anchor";
-import idl from './info/idl.json';
+import devnetIdl from './info/devnet/idl.json';
+import mainnetIdl from './info/mainnet/idl.json';
 import { BidMessageFactory } from './BidMessageFactory';
 import { Subject } from '../events/Observer';
+import settings from '../../settings/settigs';
 
 const triggerType: ("log" | "event")[] = ["log","event"];
 
@@ -15,13 +17,22 @@ export class SolanaEventListener extends Subject {
 
     constructor() {
         super();
-        console.log("Initializing Solana Event Listener...");
-        this.programId = new anchor.web3.PublicKey(idl.address);
-        this.connection = new anchor.web3.Connection(anchor.web3.clusterApiUrl("devnet"), 'confirmed');
+        console.log(`Initializing Solana Event Listener, loading IDL...network ${settings.solanaNetwork}}`);
+        this.programId = new anchor.web3.PublicKey(devnetIdl.address);
+        this.connection = new anchor.web3.Connection(anchor.web3.clusterApiUrl(settings.solanaNetwork), 'confirmed');
         const keypair = anchor.web3.Keypair.generate();
         const wallet = new anchor.Wallet(keypair);
         const provider = new AnchorProvider(this.connection, wallet, { commitment: 'confirmed' });
-        this.program = new Program(idl as Idl, provider) as unknown as Program<Idl>;
+        switch(settings.solanaNetwork) {
+            case "devnet":
+                this.program = new Program(devnetIdl as Idl, provider) as unknown as Program<Idl>;
+                break;
+            case "mainnet-beta":
+                this.program = new Program(mainnetIdl as Idl, provider) as unknown as Program<Idl>;
+                break;
+            default:
+                throw new Error(`Unsupported Solana network: ${settings.solanaNetwork}`);
+        }
     }
 
     public start() {

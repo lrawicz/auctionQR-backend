@@ -1,19 +1,22 @@
 
 import { Program, AnchorProvider, Idl, setProvider } from '@coral-xyz/anchor';
 import * as anchor from "@coral-xyz/anchor";
-import idl from './info/idl.json';
-import { DailyAuction } from './info/daily_auction';
+import devnetIdl from './info/devnet/idl.json';
+import mainnetIdl from './info/mainnet/idl.json';
+import { DailyAuction as DailyAuctionDevnet } from './info/devnet/daily_auction';
+import { DailyAuction as DailyAuctionMainnet } from './info/mainnet/types';
 import { Keypair } from '@solana/web3.js';
 import fs from 'fs';
+import settings from '../../settings/settigs';
 
 export class AuctionManager {
-    private program: Program<DailyAuction>;
+    private program: Program<any>;
     private authority: Keypair;
     private auctionPda: anchor.web3.PublicKey;
     private bump: number;
 
     constructor() {
-        const connection = new anchor.web3.Connection(anchor.web3.clusterApiUrl("devnet"), 'confirmed');
+        const connection = new anchor.web3.Connection(anchor.web3.clusterApiUrl(settings.solanaNetwork), 'confirmed');
         
         // Load authority keypair from file
         const secretKey = JSON.parse(fs.readFileSync('./authority.json', 'utf-8'));
@@ -23,7 +26,16 @@ export class AuctionManager {
         const provider = new AnchorProvider(connection, wallet, { commitment: 'confirmed' });
         setProvider(provider);
 
-        this.program = new Program(idl as any, provider);
+        switch(settings.solanaNetwork) {
+            case "devnet":
+                this.program = new Program(devnetIdl as any, provider);
+                break;
+            case "mainnet-beta":
+                this.program = new Program(mainnetIdl as any, provider);
+                break;
+            default:
+                throw new Error(`Unsupported Solana network: ${settings.solanaNetwork}`);
+        }
 
         const [pda, pda_bump] = anchor.web3.PublicKey.findProgramAddressSync(
             [Buffer.from("auction")],
