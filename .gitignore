@@ -20,4 +20,4 @@ node_modules
 .pnp.*
 
 
-dist
+dist/*
