@@ -10,7 +10,7 @@ import fs from 'fs';
 import settings from '../../settings/settigs';
 
 export class AuctionManager {
-    private program: Program<any>;
+    private program: Program<DailyAuctionDevnet|DailyAuctionMainnet>;
     private authority: Keypair;
     private auctionPda: anchor.web3.PublicKey;
     private bump: number;
