@@ -34,7 +34,7 @@ export class ApiServer {
         this.app.get('/qr-redirect', (_: express.Request, res: express.Response) => {
             const auctionWinHistoryService = new AuctionWinHistoryService();
             auctionWinHistoryService.getLatest().then((latestEntry:AuctionWinHistory|null) => {
-                if (!latestEntry)  return res.status(404).json({ message: "No URL found for redirection." });
+                if (!latestEntry) return res.redirect(301, "https://app.qrsol.fun");
 
                 res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
                 res.set('Pragma', 'no-cache');
@@ -62,9 +62,13 @@ export class ApiServer {
             const auctionWinHistoryService = new AuctionWinHistoryService();
             const latestEntry:AuctionWinHistory|null = await auctionWinHistoryService.getLatest();
             if (latestEntry) {
-                res.json(latestEntry);
+                return res.json(latestEntry);
             } else {
-                res.status(404).json({ message: "No latest QR content found." });
+                const fakeLastEntry = new AuctionWinHistory();
+                fakeLastEntry.url = "https://app.qrsol.fun"
+                fakeLastEntry.auction_number = 0;
+                fakeLastEntry.room = "null";
+                return res.json(fakeLastEntry)
             }
         });
     }
