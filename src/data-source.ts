@@ -14,4 +14,5 @@ export const AppDataSource = new DataSource({
     entities: [process.env.NODE_ENV === 'production' ? "dist/entity/**/*.js" : "src/entity/**/*.ts"],
     migrations: [process.env.NODE_ENV === 'production' ? "dist/migration/**/*.js" : "src/migration/**/*.ts"],
     subscribers: [],
+    poolSize: 10,
 });
