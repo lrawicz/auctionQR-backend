@@ -16,7 +16,7 @@ export class AuctionManager {
     private bump: number;
 
     constructor() {
-        const connection = new anchor.web3.Connection(anchor.web3.clusterApiUrl(settings.solanaNetwork), 'confirmed');
+        const connection = new anchor.web3.Connection(settings.solanaApiUrl, 'confirmed');
         
         // Load authority keypair from file
         const secretKey = JSON.parse(fs.readFileSync('./authority.json', 'utf-8'));

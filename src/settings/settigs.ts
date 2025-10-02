@@ -5,6 +5,7 @@ require('dotenv').config();
 type Settings = {
     port: number | string;
     solanaNetwork: anchor.web3.Cluster;
+    solanaApiUrl: string;
     db: DBSettings;
 }
 type DBSettings = {
@@ -18,6 +19,7 @@ type DBSettings = {
 const settings:Settings = {
     port: process.env.PORT || 3001,
     solanaNetwork: process.env.SOLANA_NETWORK as anchor.web3.Cluster || 'devnet',
+    solanaApiUrl: process.env.SOLANA_API_URL || '',
     db: {
         user: process.env.POSTGRES_USER,
         password: process.env.POSTGRES_PASSWORD,
