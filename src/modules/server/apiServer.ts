@@ -43,7 +43,7 @@ export class ApiServer {
                 const redirect = urlRAW.startsWith("http://") || urlRAW.startsWith("https://")
                                     ?urlRAW
                                     :"http://"+urlRAW;
-                return res.redirect(301, redirect);
+                return res.redirect(redirect); //default 302
             }).catch((error) => {
                 console.error("Error fetching latest entry:", error);
                 return res.status(500).json({ message: "Internal server error." });
